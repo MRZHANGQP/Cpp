@@ -25,28 +25,28 @@ Summary summarize(const std::vector<Telemetry>& frames) {
     std::array<bool, 10000> seen{};
 
     for (const Telemetry& frame : frames) {
-        if (frame.id < 0 || frame.id > 9999 ||
-            frame.hp < -1000 || frame.hp > 1000) {
+        const bool valid_id = frame.id >= 0 && frame.id <= 9999;
+        const bool valid_hp = frame.hp >= -1000 && frame.hp <= 1000;
+        if (!valid_id || !valid_hp) {
             ++result.invalid;
             continue;
         }
 
-        if (seen[static_cast<std::size_t>(frame.id)]) {
+        const std::size_t index = static_cast<std::size_t>(frame.id);
+        if (seen[index]) {
             ++result.duplicate;
             continue;
         }
 
-        seen[static_cast<std::size_t>(frame.id)] = true;
+        seen[index] = true;
         ++result.valid;
-
-        int normalized_hp = frame.hp;
-        if (normalized_hp < 0) normalized_hp = 0;
-        if (normalized_hp > 100) normalized_hp = 100;
-        result.total_hp += normalized_hp;
+        result.total_hp += std::clamp(frame.hp, 0, 100);
     }
 
     for (int id = 0; id < 10000; ++id) {
-        if (seen[static_cast<std::size_t>(id)]) result.ids.push_back(id);
+        if (seen[static_cast<std::size_t>(id)]) {
+            result.ids.push_back(id);
+        }
     }
 
     return result;
