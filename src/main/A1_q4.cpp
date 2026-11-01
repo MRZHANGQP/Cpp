@@ -19,45 +19,55 @@ struct CommandResult { long long value; int accepted; int rejected; };
 
 // BEGIN IMPLEMENTATION
 // aim-cpp-cw
+bool read_single_integer(std::istringstream& input, long long& value) {
+    if (!(input >> value)) {
+        return false;
+    }
+
+    std::string trailing;
+    if (input >> trailing) {
+        return false;
+    }
+    return true;
+}
+
+bool has_trailing_text(std::istringstream& input) {
+    std::string trailing;
+    return static_cast<bool>(input >> trailing);
+}
+
 CommandResult execute(const std::vector<std::string>& lines) {
-    constexpr long long kLimit = 1000000;
+    constexpr long long kValueLimit = 1000000;
     CommandResult result{0, 0, 0};
 
     for (const std::string& line : lines) {
         std::istringstream input(line);
-        std::string op;
-        if (!(input >> op)) {
+        std::string command;
+        if (!(input >> command)) {
             ++result.rejected;
             continue;
         }
 
-        bool valid = true;
+        bool accepted = false;
         long long candidate = result.value;
 
-        if (op == "ADD" || op == "SET") {
-            long long x = 0;
-            if (!(input >> x)) {
-                valid = false;
-            } else {
-                std::string extra;
-                if (input >> extra) valid = false;
-
-                if (valid && (x < -kLimit || x > kLimit)) valid = false;
-
-                if (valid) {
-                    candidate = (op == "ADD") ? result.value + x : x;
-                    if (candidate < -kLimit || candidate > kLimit) valid = false;
+        if (command == "ADD" || command == "SET") {
+            long long argument = 0;
+            if (read_single_integer(input, argument) &&
+                argument >= -kValueLimit && argument <= kValueLimit) {
+                candidate = (command == "ADD") ? result.value + argument : argument;
+                if (candidate >= -kValueLimit && candidate <= kValueLimit) {
+                    accepted = true;
                 }
             }
-        } else if (op == "RESET") {
-            std::string extra;
-            if (input >> extra) valid = false;
-            candidate = 0;
-        } else {
-            valid = false;
+        } else if (command == "RESET") {
+            if (!has_trailing_text(input)) {
+                candidate = 0;
+                accepted = true;
+            }
         }
 
-        if (valid) {
+        if (accepted) {
             result.value = candidate;
             ++result.accepted;
         } else {
