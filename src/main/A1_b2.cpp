@@ -20,17 +20,24 @@ namespace aim::b2 {
 // BEGIN IMPLEMENTATION
 // aim-cpp-cw
 std::size_t compact(int* data, std::size_t n, int low, int high) {
-    if (n == 0 || low > high) return 0;
-
-    std::size_t write = 0;
-    for (std::size_t read = 0; read < n; ++read) {
-        if (data[read] < low || data[read] > high) continue;
-
-        if (write != read) data[write] = data[read];
-        ++write;
+    if (n == 0 || low > high) {
+        return 0;
     }
 
-    return write;
+    std::size_t write_index = 0;
+    for (std::size_t read_index = 0; read_index < n; ++read_index) {
+        const int value = data[read_index];
+        if (value < low || value > high) {
+            continue;
+        }
+
+        if (write_index != read_index) {
+            data[write_index] = value;
+        }
+        ++write_index;
+    }
+
+    return write_index;
 }
 // END IMPLEMENTATION
 }
