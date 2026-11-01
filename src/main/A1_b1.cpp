@@ -20,25 +20,36 @@ namespace aim::b1 {
 // BEGIN IMPLEMENTATION
 // aim-cpp-cw
 bool parse_i32(const std::string& text, int& output) {
-    if (text.empty()) return false;
-
-    std::size_t i = 0;
-    bool negative = false;
-    if (text[i] == '+' || text[i] == '-') {
-        negative = (text[i] == '-');
-        ++i;
+    if (text.empty()) {
+        return false;
     }
-    if (i == text.size()) return false;
 
-    const long long limit = negative ? 2147483648LL : 2147483647LL;
+    std::size_t index = 0;
+    bool negative = false;
+    if (text[index] == '+' || text[index] == '-') {
+        negative = (text[index] == '-');
+        ++index;
+    }
+
+    if (index == text.size()) {
+        return false;
+    }
+
+    const long long max_magnitude = negative ? 2147483648LL : 2147483647LL;
     long long magnitude = 0;
 
-    for (; i < text.size(); ++i) {
-        const char ch = text[i];
-        if (ch < '0' || ch > '9') return false;
+    for (; index < text.size(); ++index) {
+        const char ch = text[index];
+        const bool is_digit = ch >= '0' && ch <= '9';
+        if (!is_digit) {
+            return false;
+        }
 
         const int digit = ch - '0';
-        if (magnitude > (limit - digit) / 10) return false;
+        const bool would_overflow = magnitude > (max_magnitude - digit) / 10;
+        if (would_overflow) {
+            return false;
+        }
         magnitude = magnitude * 10 + digit;
     }
 
