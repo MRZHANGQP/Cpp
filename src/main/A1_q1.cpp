@@ -20,19 +20,27 @@ namespace aim::q1 {
 // BEGIN IMPLEMENTATION
 // aim-cpp-cw
 long long ratio(long long hp, long long max_hp) {
-    if (max_hp <= 0) return -1;
-    if (hp < 0) hp = 0;
-    if (hp > max_hp) hp = max_hp;
+    if (max_hp <= 0) {
+        return -1;
+    }
+
+    hp = std::clamp(hp, 0LL, max_hp);
     return hp * 100 / max_hp;
 }
 
 std::string report(int id, long long hp, long long max_hp, int battery) {
-    std::string hp_text = (max_hp <= 0) ? "INVALID" : std::to_string(ratio(hp, max_hp));
+    const std::string hp_text = (max_hp > 0)
+        ? std::to_string(ratio(hp, max_hp))
+        : "INVALID";
 
-    if (battery < 0) battery = 0;
-    if (battery > 100) battery = 100;
+    battery = std::clamp(battery, 0, 100);
 
-    const char* state = battery >= 60 ? "OK" : (battery >= 20 ? "WARNING" : "LOW");
+    const char* state = "LOW";
+    if (battery >= 60) {
+        state = "OK";
+    } else if (battery >= 20) {
+        state = "WARNING";
+    }
 
     return "ID=" + std::to_string(id) +
            ";HP=" + hp_text +
