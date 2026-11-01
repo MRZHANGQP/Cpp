@@ -20,7 +20,9 @@ struct Target { int id; int x; int y; int hp; bool visible; };
 // BEGIN IMPLEMENTATION
 // aim-cpp-cw
 int select_target(const std::vector<Target>& targets, int max_range) {
-    if (max_range < 0) return -1;
+    if (max_range < 0) {
+        return -1;
+    }
 
     const long long range_sq = static_cast<long long>(max_range) * max_range;
     bool found = false;
@@ -29,17 +31,29 @@ int select_target(const std::vector<Target>& targets, int max_range) {
     long long best_dist_sq = 0;
 
     for (const Target& target : targets) {
-        if (!target.visible || target.hp <= 0) continue;
+        if (!target.visible || target.hp <= 0) {
+            continue;
+        }
 
         const long long dist_sq =
             static_cast<long long>(target.x) * target.x +
             static_cast<long long>(target.y) * target.y;
-        if (dist_sq > range_sq) continue;
+        if (dist_sq > range_sq) {
+            continue;
+        }
 
-        if (!found ||
-            target.hp < best_hp ||
-            (target.hp == best_hp && dist_sq < best_dist_sq) ||
-            (target.hp == best_hp && dist_sq == best_dist_sq && target.id < best_id)) {
+        bool better = !found;
+        if (found) {
+            if (target.hp != best_hp) {
+                better = target.hp < best_hp;
+            } else if (dist_sq != best_dist_sq) {
+                better = dist_sq < best_dist_sq;
+            } else {
+                better = target.id < best_id;
+            }
+        }
+
+        if (better) {
             found = true;
             best_id = target.id;
             best_hp = target.hp;
@@ -47,7 +61,10 @@ int select_target(const std::vector<Target>& targets, int max_range) {
         }
     }
 
-    return found ? best_id : -1;
+    if (!found) {
+        return -1;
+    }
+    return best_id;
 }
 // END IMPLEMENTATION
 }
