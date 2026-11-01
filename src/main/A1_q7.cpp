@@ -24,12 +24,14 @@ FireResult simulate(int ammo, int heat, int cool, int shot_heat, const std::vect
     int rejected = 0;
 
     for (int request : requests) {
-        heat -= cool;
-        if (heat < 0) heat = 0;
+        heat = std::max(0, heat - cool);
 
-        if (request != 1) continue;
+        if (request != 1) {
+            continue;
+        }
 
-        if (ammo > 0 && heat + shot_heat <= 100) {
+        const bool can_fire = ammo > 0 && heat + shot_heat <= 100;
+        if (can_fire) {
             --ammo;
             heat += shot_heat;
             ++shots;
