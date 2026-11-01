@@ -19,22 +19,42 @@ struct LabelEdit { std::string from; std::string to; };
 
 // BEGIN IMPLEMENTATION
 // aim-cpp-cw
-std::string edit_labels(std::string labels, const std::vector<LabelEdit>& edits) {
+std::vector<std::string> split_labels(const std::string& labels) {
     std::vector<std::string> tags;
     std::istringstream input(labels);
     std::string tag;
     while (std::getline(input, tag, ',')) {
         tags.push_back(tag);
     }
+    return tags;
+}
+
+std::string join_labels(const std::vector<std::string>& tags) {
+    std::string result;
+    for (std::size_t i = 0; i < tags.size(); ++i) {
+        if (i > 0) {
+            result += ',';
+        }
+        result += tags[i];
+    }
+    return result;
+}
+
+std::string edit_labels(std::string labels, const std::vector<LabelEdit>& edits) {
+    std::vector<std::string> tags = split_labels(labels);
 
     for (const LabelEdit& edit : edits) {
         if (edit.from.empty()) {
-            if (!edit.to.empty()) tags.push_back(edit.to);
+            if (!edit.to.empty()) {
+                tags.push_back(edit.to);
+            }
             continue;
         }
 
         for (std::size_t i = 0; i < tags.size(); ++i) {
-            if (tags[i] != edit.from) continue;
+            if (tags[i] != edit.from) {
+                continue;
+            }
 
             if (edit.to.empty()) {
                 tags.erase(tags.begin() + static_cast<std::ptrdiff_t>(i));
@@ -45,12 +65,7 @@ std::string edit_labels(std::string labels, const std::vector<LabelEdit>& edits)
         }
     }
 
-    std::string result;
-    for (std::size_t i = 0; i < tags.size(); ++i) {
-        if (i != 0) result += ',';
-        result += tags[i];
-    }
-    return result;
+    return join_labels(tags);
 }
 // END IMPLEMENTATION
 }
