@@ -18,7 +18,45 @@ namespace aim::q5 {
 
 
 // BEGIN IMPLEMENTATION
-std::vector<std::vector<int>> risk(const std::vector<std::string>& grid) { throw std::runtime_error("TODO"); }
+// aim-cpp-cw
+std::vector<std::vector<int>> risk(const std::vector<std::string>& grid) {
+    if (grid.empty()) return {};
+
+    const int rows = static_cast<int>(grid.size());
+    const int cols = static_cast<int>(grid[0].size());
+    if (cols == 0) throw std::invalid_argument("grid has zero columns");
+
+    for (const std::string& row : grid) {
+        if (static_cast<int>(row.size()) != cols) {
+            throw std::invalid_argument("grid rows differ in length");
+        }
+        for (char cell : row) {
+            if (cell != '.' && cell != '#') {
+                throw std::invalid_argument("grid contains an invalid character");
+            }
+        }
+    }
+
+    std::vector<std::vector<int>> result(rows, std::vector<int>(cols, 0));
+
+    for (int r = 0; r < rows; ++r) {
+        for (int c = 0; c < cols; ++c) {
+            if (grid[r][c] == '#') {
+                result[r][c] = -1;
+                continue;
+            }
+
+            int count = 0;
+            if (r > 0 && grid[r - 1][c] == '#') ++count;
+            if (r + 1 < rows && grid[r + 1][c] == '#') ++count;
+            if (c > 0 && grid[r][c - 1] == '#') ++count;
+            if (c + 1 < cols && grid[r][c + 1] == '#') ++count;
+            result[r][c] = count;
+        }
+    }
+
+    return result;
+}
 // END IMPLEMENTATION
 }
 
